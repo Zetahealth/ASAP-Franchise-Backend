@@ -119,10 +119,33 @@ class Api::V1::FranchiseController < ApplicationController
   before_action :authenticate_user!
   before_action :set_franchise, only: [:show, :update, :destroy , :upload_banner , :upload_logo]
 
+  # def index
+  #   @franchises = Franchise.includes(:franchise_detail).all
+  #   render json: @franchises, include: :franchise_detail
+  # end
+
+
   def index
     @franchises = Franchise.includes(:franchise_detail).all
-    render json: @franchises, include: :franchise_detail
+
+    render json: @franchises.map { |franchise|
+      {
+        id: franchise.id,
+        name: franchise.name,
+        franchise_detail: franchise.franchise_detail.present? ? {
+          id: franchise.franchise_detail.id,
+          location: franchise.location,
+          investment: franchise.franchise_detail.investment,
+          roi: franchise.franchise_detail.roi,
+          roiColor: franchise.franchise_detail.roi.include?('15-20%') ? "bg-green-200 text-green-800" : franchise.franchise_detail.roi.include?('10-15%') ? "bg-yellow-200 text-yellow-800" : "bg-red-200 text-red-800",
+          
+        } : nil,
+        logo: franchise.logo.attached? ? url_for(franchise.logo) : nil,
+        banner: franchise.banner.attached? ? url_for(franchise.banner) : nil
+      }
+    }
   end
+
 
 
   def show

@@ -33,9 +33,19 @@ class Api::V1::ProfilesController < ApplicationController
   before_action :authenticate_user!
   before_action :set_profile
 
+  # def show
+  #   render json: @profile, status: :ok
+  # end
+
   def show
-    render json: @profile, status: :ok
+    render json: @profile.as_json.merge({
+      avatar_url: @profile.avatar.attached? ? url_for(@profile.avatar) : nil
+    }), status: :ok
   end
+
+
+
+
 
   def update
     if @profile.update(profile_params)
@@ -51,6 +61,7 @@ class Api::V1::ProfilesController < ApplicationController
       @profile = current_user.profile || current_user.create_profile!(email: current_user.email)
   end
   def profile_params
-    params.require(:profile).permit(:first_name, :last_name, :user_name, :country, :phone, :email)
+    params.require(:profile).permit(:first_name, :last_name, :user_name, :country, :phone, :email, :avatar)
   end
+
 end
