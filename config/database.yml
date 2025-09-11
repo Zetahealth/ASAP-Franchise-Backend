@@ -61,7 +61,26 @@ test:
   password: root
 
 production:
-  <<: *default
-  database: Asap_production   
-  username: root
-  password: root
+  primary:
+    <<: *default
+    database: Asap_production
+    username: root
+    password: asap@123
+
+  cable:
+    <<: *default
+    database: Asap_production
+    username: root
+    password: asap@123
+
+  queue:
+    <<: *default
+    database: Asap_production
+    username: root
+    password: asap@123
+
+  cache:
+    <<: *default
+    database: Asap_production
+    username: root
+    password: asap@123

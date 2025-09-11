@@ -23,7 +23,7 @@ Rails.application.routes.draw do
      
     end
 
-    root "home#index"
+    # root "home#index"
 
     namespace :api do
       namespace :v1 do
@@ -131,6 +131,8 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   # Defines the root path route ("/")
-  
+  root 'health#index'
+  get '/health', to: 'health#index'
 
 end
+
