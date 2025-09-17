@@ -107,9 +107,41 @@ class Users::SessionsController < Devise::SessionsController
   # end
 
 
+  # def respond_with(resource, _opts = {})
+  #   if resource.persisted?
+  #     token = Warden::JWTAuth::UserEncoder.new.call(resource, :user, nil).first
+
+  #     # fetch role details from AdminSettingsUserRole
+  #     role_details = AdminSettingsUserRole.find_by(role: resource.role)
+
+  #     # fetch franchise (if user belongs to one)
+  #     franchise_details = resource.franchises&.as_json(only: [:id, :name]) 
+
+  #     # ✅ Build profile data with avatar URL
+  #     profile_data = resource.profile.as_json.merge({
+  #       avatar_url: resource.profile.avatar.attached? ? Rails.application.routes.url_helpers.url_for(resource.profile.avatar) : nil
+  #     })
+
+
+  #     render json: {
+  #       message: 'Logged in successfully.',
+  #       user: resource.as_json(only: [:id, :email, :role, :franchise_id]),
+  #       role: resource.role,
+  #       role_details: role_details&.as_json(only: [:name, :role, :permissions]),
+  #       franchise: franchise_details,
+  #       profile: profile_data,
+  #       token: token
+  #     }, status: :ok
+  #   else
+  #     render json: { error: 'Invalid login credentials' }, status: :unauthorized
+  #   end
+  # end
   def respond_with(resource, _opts = {})
     if resource.persisted?
       token = Warden::JWTAuth::UserEncoder.new.call(resource, :user, nil).first
+
+      # ✅ Ensure profile exists
+      profile = resource.profile || resource.create_profile!(email: resource.email)
 
       # fetch role details from AdminSettingsUserRole
       role_details = AdminSettingsUserRole.find_by(role: resource.role)
@@ -117,11 +149,10 @@ class Users::SessionsController < Devise::SessionsController
       # fetch franchise (if user belongs to one)
       franchise_details = resource.franchises&.as_json(only: [:id, :name]) 
 
-      # ✅ Build profile data with avatar URL
-      profile_data = resource.profile.as_json.merge({
-        avatar_url: resource.profile.avatar.attached? ? Rails.application.routes.url_helpers.url_for(resource.profile.avatar) : nil
+      # ✅ Build profile data safely
+      profile_data = profile.as_json.merge({
+        avatar_url: profile.avatar.attached? ? Rails.application.routes.url_helpers.url_for(profile.avatar) : nil
       })
-
 
       render json: {
         message: 'Logged in successfully.',
